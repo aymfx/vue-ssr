@@ -14,6 +14,8 @@ npm run dev
 # 构建线上服务  服务器端ssr http://localhost:30001/
 npm run build
 
+node server 
+
 # build for production and view the bundle analyzer report
 npm run build --report
 ```

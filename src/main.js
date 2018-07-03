@@ -8,22 +8,16 @@ import {
 
 Vue.config.productionTip = false
 
-/* eslint-disable no-new */
-/* new Vue({
-  el: '#app',
-  router,
-  components: { App },
-  template: '<App/>'
-}) */
-
+/* eslint-disable */
 export function createApp() {
-  // 创建路由实例
-  const router = new createRouter();
+  // 创建 router 实例
+  const router = new createRouter()
   const app = new Vue({
+    // 注入 router 到根 Vue 实例
     router,
     render: h => h(App)
   })
-
+  // 返回 app 和 router
   return {
     app,
     router

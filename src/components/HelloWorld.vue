@@ -4,6 +4,7 @@
     <div>
       <h2>{{mode}}</h2>
     </div>
+    我司改改对的对的
     <div><span>{{count}}</span></div>
     <div><button @click="count++">+1</button></div>
   </div>

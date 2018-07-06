@@ -2,68 +2,139 @@
  * @Author: ly 
  * @Date: 2018-07-05 10:01:44 
  * @Last Modified by: ly
- * @Last Modified time: 2018-07-06 10:00:28
- * @description: {'koa服务器配置'} 
+ * @Last Modified time: 2018-07-06 14:00:07
+ * @description: {'服务器配置'} 
  */
-
-const Koa = require('koa')
-const app = new Koa()
 const fs = require('fs')
 const path = require('path')
+const LRU = require('lru-cache') //组件缓存
+const express = require('express')
+const favicon = require('serve-favicon') //
+const compression = require('compression')
+const microcache = require('route-cache')
 const {
     createBundleRenderer
 } = require('vue-server-renderer')
 
+const isProd = process.env.NODE_ENV === 'production'
+const port = process.env.PORT || 3000
 const resolve = file => path.resolve(__dirname, file)
+const serverInfo =
+    `express/${require('express/package.json').version} ` +
+    `vue-server-renderer/${require('vue-server-renderer/package.json').version}`; //express服务器版本号以及vue-server-renderer版本号
 
-const isProd = process.env.NODE_ENV === 'production';
-const template = fs.readFileSync(resolve('./src/index.template.html'), 'utf-8')
-const clientManifest = require('./dist/vue-ssr-client-manifest.json')
-const serverBundle = require('./dist/vue-ssr-server-bundle.json')
+const app = express()
 
+/**
+ * 创建一个render函数
+ *
+ * @param {*} bundle
+ * @param {*} options
+ * @returns
+ */
+function createRenderer(bundle, options) {
+    // https://ssr.vuejs.org/zh/api/#runinnewcontext  方法介绍
+    return createBundleRenderer(bundle, Object.assign(options, {
+        // 使用组件缓存
+        cache: LRU({
+            max: 1000,
+            maxAge: 1000 * 60 * 15
+        }),
+        // 显式地声明 server bundle 的运行目录，vue-server-renderer 是通过 NPM link 链接到当前项目中时，才需要配置此选项
+        basedir: resolve('./dist'),
+        // 对于每次渲染，bundle renderer 将创建一个新的 V8 上下文并重新执行整个 bundle,禁用最好
+        runInNewContext: false
+    }))
+}
 
-// 生成服务端渲染函数
-const renderer = createBundleRenderer(serverBundle, {
-    // 推荐
-    runInNewContext: false,
-    // 模板html文件
-    template,
-    // client manifest
-    clientManifest
+let renderer
+let readyPromise
+const templatePath = resolve('./src/index.template.html')
+if (isProd) {
+    // 在生产中：使用模板和构建服务器束创建服务器渲染器。
+    //vue-ssr-webpack-plugin创建 server bundle
+    const template = fs.readFileSync(templatePath, 'utf-8')
+    const bundle = require('./dist/vue-ssr-server-bundle.json')
+    // client manifest 是可选的，但是它允许被渲染
+    // 自动预取链接并直接添加<script>
+    // 在呈现期间使用的任何异步块的标记，避免瀑布请求
+    const clientManifest = require('./dist/vue-ssr-client-manifest.json')
+    renderer = createRenderer(bundle, {
+        template,
+        clientManifest
+    })
+} else {
+    // 在开发环境中，使用watch and hot-reload,
+    // 更新新新的包和模板.
+    readyPromise = require('./build/webpack.dev.conf')(
+        app,
+        templatePath,
+        (bundle, options) => {
+            renderer = createRenderer(bundle, options)
+        }
+    )
+}
+
+const serve = (path, cache) => express.static(resolve(path), {
+    maxAge: cache && isProd ? 1000 * 60 * 60 * 24 * 30 : 0
 })
 
+//开启网站压缩功能
+app.use(compression({
+    threshold: 0
+}))
+
+//设置静态目录
+app.use(serve('./dist', true))
+
+//设置请求的favicon
+
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')))
+
+//每个请求微缓存一秒
+app.use(microcache.cacheSeconds(1))
 
 
-function renderToString(context) {
-    return new Promise((resolve, reject) => {
-        renderer.renderToString(context, (err, html) => {
-            err ? reject(err) : resolve(html)
-        })
+// 生产环境的数据的渲染
+function render(req, res) {
+    const s = Date.now()
+    res.setHeader("Content-Type", "text/html")
+    res.setHeader("Server", serverInfo)
+
+    const handleError = err => {
+        if (err.url) {
+            res.redirect(err.url)
+        } else if (err.code === 404) {
+            res.status(404).send('页面开小差了,可能路径不对哦')
+        } else {
+            // Render Error Page or Redirect
+            res.status(500).send('服务器出小差了,程序员小哥哥正在修复~~')
+            console.error(`渲染错误 : ${req.url},时间:${s.toString()}`)
+            console.error(err.stack)
+        }
+    }
+
+    const context = {
+        title: '服务端渲染测试', // 设置title
+        content: '插入meta标签测试',
+        url: req.url
+    }
+    renderer.renderToString(context, (err, html) => {
+        if (err) {
+            return handleError(err)
+        }
+        res.send(html)
+        if (isProd) {
+            console.log(`整个请求时间: ${Date.now() - s}ms`)
+        }
     })
 }
-app.use(require('koa-static')(resolve('./dist')))
-// response
-app.use(async (ctx, next) => {
-    const context = {
-        title: '服务端渲染测试',
-        url: ctx.url
-    };
-    try {
-        console.log(context, 12)
-        // 将服务器端渲染好的html返回给客户端
-        ctx.body = await renderToString(context)
 
-        // 设置请求头
-        ctx.set('Content-Type', 'text/html')
-        ctx.set('Server', 'Koa2 server side render')
-    } catch (e) {
-        // 如果没找到，放过请求，继续运行后面的中间件
-        next()
-    }
+app.get('*', isProd ? render : (req, res) => {
+    readyPromise.then(() => render(req, res))
 })
 
-if (isProd) {
 
-}
-
-app.listen(3000)
+app.listen(port, () => {
+    console.log(`服务器已经运行在 localhost:${port}`)
+})

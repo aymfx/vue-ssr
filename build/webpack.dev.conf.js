@@ -2,7 +2,7 @@
  * @Author: ly 
  * @Date: 2018-07-05 10:00:43 
  * @Last Modified by: ly
- * @Last Modified time: 2018-07-06 09:56:46
+ * @Last Modified time: 2018-07-06 14:03:03
  * @description: {'开发环境的配置'} 
  */
 
@@ -39,15 +39,15 @@ module.exports = function setupDevServer(app, templatePath, cb) {
         }
     }
 
-    // read template from disk and watch
+    // 读取磁盘中的index.html template 并且监控更新
     template = fs.readFileSync(templatePath, 'utf-8')
     chokidar.watch(templatePath).on('change', () => {
         template = fs.readFileSync(templatePath, 'utf-8')
-        console.log('index.html template updated.')
+        console.log('index.html template 已经更新.')
         update()
     })
 
-    // modify client config to work with hot middleware
+    // 通过hot-middleware更新client
     clientConfig.entry.app = ['webpack-hot-middleware/client', clientConfig.entry.app]
     clientConfig.output.filename = '[name].js'
     clientConfig.plugins.push(
@@ -74,7 +74,7 @@ module.exports = function setupDevServer(app, templatePath, cb) {
         update()
     })
 
-    // hot middleware
+    // 注册 hot middleware
     app.use(require('webpack-hot-middleware')(clientCompiler, {
         heartbeat: 5000
     }))

@@ -2,7 +2,7 @@
  * @Author: ly 
  * @Date: 2018-07-05 10:01:44 
  * @Last Modified by: ly
- * @Last Modified time: 2018-07-06 09:38:33
+ * @Last Modified time: 2018-07-06 10:00:28
  * @description: {'koa服务器配置'} 
  */
 
@@ -15,10 +15,12 @@ const {
 } = require('vue-server-renderer')
 
 const resolve = file => path.resolve(__dirname, file)
-const serverBundle = require('./dist/vue-ssr-server-bundle.json')
+
+const isProd = process.env.NODE_ENV === 'production';
 const template = fs.readFileSync(resolve('./src/index.template.html'), 'utf-8')
 const clientManifest = require('./dist/vue-ssr-client-manifest.json')
-const isProd = process.env.NODE_ENV === 'production';
+const serverBundle = require('./dist/vue-ssr-server-bundle.json')
+
 
 // 生成服务端渲染函数
 const renderer = createBundleRenderer(serverBundle, {
@@ -29,6 +31,8 @@ const renderer = createBundleRenderer(serverBundle, {
     // client manifest
     clientManifest
 })
+
+
 
 function renderToString(context) {
     return new Promise((resolve, reject) => {
@@ -57,5 +61,9 @@ app.use(async (ctx, next) => {
         next()
     }
 })
+
+if (isProd) {
+
+}
 
 app.listen(3000)

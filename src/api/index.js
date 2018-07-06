@@ -17,8 +17,9 @@ const getDate = ({
             url: api + url,
             data
         }).then((data) => {
-            resolve(data)
-        }).fail((err) => {
+            console.log(data.data)
+            resolve(data.data)
+        }).catch((err) => {
             reject(err)
         })
     })
@@ -26,6 +27,6 @@ const getDate = ({
 
 export function getItem() {
     return getDate({
-        url: 'result'
+        url: '/result'
     })
 }

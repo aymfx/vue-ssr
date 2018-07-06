@@ -8,24 +8,23 @@ Vue.use(Vuex)
 
 export function createStore() {
     return new Vuex.Store({
-            state: {
-                item:'',
-                user: {},
-                todos: [{
-                        id: 1,
-                        text: '...',
-                        done: true
-                    },
-                    {
-                        id: 2,
-                        text: '...',
-                        done: false
-                    }
-                ]
-            },
-            actions,
-            mutations,
-            getters
-        }
-    )
+        state: {
+            item: '1212',
+            user: {},
+            todos: [{
+                    id: 1,
+                    text: '...',
+                    done: true
+                },
+                {
+                    id: 2,
+                    text: '...',
+                    done: false
+                }
+            ]
+        },
+        actions,
+        mutations,
+        getters
+    })
 }

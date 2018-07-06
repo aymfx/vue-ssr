@@ -1,3 +1,11 @@
+/*
+ * @Author: ly 
+ * @Date: 2018-07-05 10:01:44 
+ * @Last Modified by: ly
+ * @Last Modified time: 2018-07-06 09:38:33
+ * @description: {'koa服务器配置'} 
+ */
+
 const Koa = require('koa')
 const app = new Koa()
 const fs = require('fs')
@@ -6,18 +14,20 @@ const {
     createBundleRenderer
 } = require('vue-server-renderer')
 
-const isProd = process.env.NODE_ENV === 'production'
-
 const resolve = file => path.resolve(__dirname, file)
+const serverBundle = require('./dist/vue-ssr-server-bundle.json')
+const template = fs.readFileSync(resolve('./src/index.template.html'), 'utf-8')
+const clientManifest = require('./dist/vue-ssr-client-manifest.json')
+const isProd = process.env.NODE_ENV === 'production';
 
 // 生成服务端渲染函数
-const renderer = createBundleRenderer(require('./dist/vue-ssr-server-bundle.json'), {
+const renderer = createBundleRenderer(serverBundle, {
     // 推荐
     runInNewContext: false,
     // 模板html文件
-    template: fs.readFileSync(resolve('./index.template.html'), 'utf-8'),
+    template,
     // client manifest
-    clientManifest: require('./dist/vue-ssr-client-manifest.json')
+    clientManifest
 })
 
 function renderToString(context) {
@@ -30,11 +40,12 @@ function renderToString(context) {
 app.use(require('koa-static')(resolve('./dist')))
 // response
 app.use(async (ctx, next) => {
+    const context = {
+        title: '服务端渲染测试',
+        url: ctx.url
+    };
     try {
-        const context = {
-            title: '服务端渲染测试', // {{title}}
-            url: ctx.url
-        }
+        console.log(context, 12)
         // 将服务器端渲染好的html返回给客户端
         ctx.body = await renderToString(context)
 
@@ -47,4 +58,4 @@ app.use(async (ctx, next) => {
     }
 })
 
-app.listen(3001)
+app.listen(3000)

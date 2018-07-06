@@ -1,3 +1,11 @@
+/*
+ * @Author: ly 
+ * @Date: 2018-07-05 10:01:07 
+ * @Last Modified by: ly
+ * @Last Modified time: 2018-07-05 17:52:19
+ * @description: {'服务端的渲染webpack配置'} 
+ */
+
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 const nodeExternals = require('webpack-node-externals')

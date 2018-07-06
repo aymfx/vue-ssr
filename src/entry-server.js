@@ -1,20 +1,30 @@
 import {
-    createApp
+  createApp
 } from './main'
-
 export default context => {
-    // 因为可能存在异步组件，所以等待router将所有异步组件加载完毕，服务器端配置也需要此操作
-    // 因为这边 router.onReady 是异步的，所以我们返回一个 Promise
-    // 确保路由或组件准备就绪
-    return new Promise((resolve, reject) => {
-        const {
-            app,
-            router
-        } = createApp(context)
-        router.push(context.url)
-        router.onReady(() => {
-            console.log('router ready')
-            resolve(app)
-        }, reject)
-    })
+  // 因为有可能会是异步路由钩子函数或组件，所以我们将返回一个 Promise，
+  // 以便服务器能够等待所有的内容在渲染前，
+  // 就已经准备就绪。
+  return new Promise((resolve, reject) => {
+    const {
+      app,
+      router
+    } = createApp()
+    // 设置服务器端 router 的位置
+    router.push(context.url)
+    // 等到 router 将可能的异步组件和钩子函数解析完
+    router.onReady(() => {
+      const matchedComponents = router.getMatchedComponents()
+      // 匹配不到的路由，执行 reject 函数，并返回 404
+      console.warn(matchedComponents.beforeCreate, 1989)
+      if (!matchedComponents.length) {
+        // eslint-disable-next-line
+        return reject({
+          code: 404
+        })
+      }
+      // Promise 应该 resolve 应用程序实例，以便它可以渲染
+      resolve(app)
+    }, reject)
+  })
 }

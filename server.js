@@ -2,7 +2,7 @@
  * @Author: ly 
  * @Date: 2018-07-05 10:01:44 
  * @Last Modified by: ly
- * @Last Modified time: 2018-07-06 14:00:07
+ * @Last Modified time: 2018-07-06 16:45:05
  * @description: {'服务器配置'} 
  */
 const fs = require('fs')
@@ -86,6 +86,7 @@ app.use(compression({
 
 //设置静态目录
 app.use(serve('./dist', true))
+
 
 //设置请求的favicon
 

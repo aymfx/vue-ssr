@@ -7,6 +7,9 @@
     我司改改对的对的
     <div><span>{{count}}</span></div>
     <div><button @click="count++">+1</button></div>
+    <div>
+      我显示{{length}}
+    </div>
   </div>
 </template>
 
@@ -17,7 +20,8 @@ export default {
     return {
       msg: "Welcome to Your Vue.js App",
       mode: process.env.VUE_ENV === "server" ? "server" : "client",
-      count: 2
+      count: 2,
+      length: this.$store.getters.doneTodosCount
     };
   }
 };

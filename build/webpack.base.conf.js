@@ -2,7 +2,7 @@
  * @Author: ly 
  * @Date: 2018-07-05 09:44:58 
  * @Last Modified by: ly
- * @Last Modified time: 2018-07-05 17:58:04
+ * @Last Modified time: 2018-07-06 14:43:54
  * @description: {'webpack的通用的配置'} 
  */
 
@@ -12,54 +12,6 @@ const VueLoaderPlugin = require("vue-loader/lib/plugin");
 function resolve(dir) {
     return path.join(__dirname, "..", dir);
 }
-
-/* module.exports = {
-    context: path.resolve(__dirname, '../'),
-    // 设置map，
-    entry: {
-        // app: './src/test.js'
-        app: './src/entry-client.js'
-    },
-    output: {
-        path: path.resolve(__dirname, '../dist'),
-        filename: 'static/js/[name].js',
-        publicPath: '/'
-    },
-    resolve: { //解析，对一些操作更加方便快捷
-        extensions: ['.js', '.vue', '.json'], //自动解决某些扩展名 便于webpack识别
-        alias: { //为一些路径添加别名
-            'vue$': 'vue/dist/vue.esm.js',
-            '@': resolve('src'),
-        }
-    },
-    module: {
-        rules: [{
-                test: /\.vue$/,
-                use: [
-                    'vue-loader'
-                ]
-            },
-            {
-                test: /\.css$/,
-                use: [
-                    'style-loader',
-                    'css-loader'
-                ]
-            }, {
-                test: /\.js$/,
-                use: [
-                    "babel-loader"
-                ],
-                exclude: [
-                    'node_modules'
-                ]
-            }
-        ]
-    },
-    plugins: [
-        new VueLoaderPlugin()
-    ]
-} */
 
 module.exports = {
     context: path.resolve(__dirname, "../"),
@@ -73,9 +25,9 @@ module.exports = {
         chunkFilename: 'static/js/[id].[chunkhash].js',
         publicPath: "/"
     },
-    resolve: {
-        extensions: [".js", ".vue", ".json"],
-        alias: {
+    resolve: { //解析，对一些操作更加方便快捷
+        extensions: [".js", ".vue", ".json"], //自动解决某些扩展名 便于webpack识别
+        alias: { //为一些路径添加别名
             vue$: "vue/dist/vue.esm.js",
             "@": resolve("src")
         }

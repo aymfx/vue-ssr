@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
 import about from '@/pages/about/about.vue'
+
+const HelloWorld = () =>
+  import ('@/components/HelloWorld')
 
 Vue.use(Router)
 
-export function createRouter() {
+export function createRouter() {  
   return new Router({
     mode: 'history',
     routes: [{

@@ -4,11 +4,11 @@
     <div>
       <h2>{{mode}}</h2>
     </div>
-    我司改改对的对的
+    测试
     <div><span>{{count}}</span></div>
     <div><button @click="count++">+1</button></div>
     <div>
-      我显示{{item}}
+      我叫{{item.name}},今年{{item.age}}
     </div>
   </div>
 </template>
@@ -16,26 +16,38 @@
 <script>
 export default {
   name: "hello",
-  asyncData() {
-    return;
+  asyncData({ store, route }) {
+    return store.dispatch("fetchItem");
   },
   data() {
     return {
       msg: "Welcome to Your Vue.js App",
       mode: process.env.VUE_ENV === "server" ? "server" : "client",
       count: 2,
-      length: this.$store.getters.doneTodosCount,
-      item: ""
+      length: this.$store.getters.doneTodosCount
     };
   },
+  computed: {
+    item() {
+      return this.$store.getters.getItems;
+    }
+  },
+  beforeCreate() {
+    console.log("beforeCreate");
+  },
   created() {
-    this.getItems();
+    console.log("created");
   },
   methods: {
     getItems() {
-      this.$store.dispatch("fetchItem");
-      this.item = this.$store.getters.getItems;
+      console.log(1212);
     }
+  },
+  beforeMount() {
+    console.log("beforeMount");
+  },
+  mounted() {
+    console.log("mounted");
   }
 };
 </script>

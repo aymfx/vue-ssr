@@ -25,8 +25,8 @@ const getDate = ({
     })
 }
 
-export function getItem() {
-    return getDate({
+export async function getItem() {
+    return await getDate({
         url: '/result'
     })
 }
